@@ -1,4 +1,4 @@
 spacemath
 =========
 
-Spacemath
+Spacemath sucks.
