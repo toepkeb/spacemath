@@ -1,3 +1,0 @@
-spacemath
-
-Spacemath sucks.
