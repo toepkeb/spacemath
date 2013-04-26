@@ -6,11 +6,14 @@ public class ButtonAnchor : MonoBehaviour {
 	public bool active;
 	public bool clicked;
 	
+	Transform[] children;
 	bool touching;
 	float clickTimer;
 	// Use this for initialization
 	void Start () {
+		children = GetComponentsInChildren<Transform>();
 		CalculateColliderBounds();
+		
 	}
 	
 	// Update is called once per frame
@@ -37,10 +40,11 @@ public class ButtonAnchor : MonoBehaviour {
 		
 		clicked = true;
 		clickTimer = 1;
-		foreach (Transform br in transform)
+		foreach (Transform br in children)
 		{
 			if (br.gameObject.GetComponent<ButtonReaction>())
 				br.gameObject.GetComponent<ButtonReaction>().Click();
+			
 		}
 	}
 	
@@ -49,10 +53,15 @@ public class ButtonAnchor : MonoBehaviour {
 		if (!active)
 			return;
 		
-		foreach (Transform br in transform)
+		touching = true;
+		
+		foreach (Transform br in children)
 		{
 			if (br.gameObject.GetComponent<ButtonReaction>())
+			{
 				br.gameObject.GetComponent<ButtonReaction>().TouchDown();
+			}
+			
 		}
 	}
 	
@@ -72,7 +81,7 @@ public class ButtonAnchor : MonoBehaviour {
 		
 		touching = false;
 		
-		foreach (Transform br in transform)
+		foreach (Transform br in children)
 		{
 			if (br.gameObject.GetComponent<ButtonReaction>())
 				br.gameObject.GetComponent<ButtonReaction>().Canceled();
@@ -95,7 +104,7 @@ public class ButtonAnchor : MonoBehaviour {
 		Vector3 max = Vector3.one *-Mathf.Infinity;
 		int count = 0;
 		
-		foreach (Transform t in transform)
+		foreach (Transform t in children)
 		{
 			BoxCollider col = t.GetComponent<BoxCollider>();
 			if (col)

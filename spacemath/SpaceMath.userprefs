@@ -1,9 +1,7 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Resources/Scripts/Profile/ButtonReaction.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Resources/Scripts/Profile/SetMaterialOffset.cs">
     <Files>
-      <File FileName="../../../Project Files/CarnivalMath_SVN/Assets/Resources/Scripts/Game/CarControl.cs" Line="18" Column="9" />
-      <File FileName="../../CrabbyWriter_u4.0/Assets/Scripts/CSandCastle.cs" Line="397" Column="87" />
       <File FileName="Assets/Resources/Scripts/Profile/Profile.cs" Line="93" Column="3" />
       <File FileName="Assets/Resources/Scripts/Profile/StatManager.cs" Line="24" Column="5" />
       <File FileName="Assets/Resources/Scripts/Profile/Skill.cs" Line="10" Column="1" />
@@ -11,11 +9,12 @@
       <File FileName="Assets/Scripts/Sending/StarFoxPlayer.cs" Line="19" Column="21" />
       <File FileName="Assets/Scripts/Sending/StarFoxCamera.cs" Line="59" Column="1" />
       <File FileName="Assets/Scripts/Sending/SendingCamera.cs" Line="37" Column="1" />
-      <File FileName="Assets/Resources/Scripts/Profile/ProfileManager.cs" Line="29" Column="1" />
+      <File FileName="Assets/Resources/Scripts/Profile/ProfileManager.cs" Line="118" Column="52" />
+      <File FileName="Assets/Resources/Scripts/Profile/ProfileCamera.cs" Line="26" Column="64" />
       <File FileName="Assets/Resources/Scripts/Profile/ButtonReaction.cs" Line="86" Column="2" />
-      <File FileName="Assets/Resources/Scripts/Profile/ButtonDetection.cs" Line="6" Column="19" />
-      <File FileName="Assets/Resources/Scripts/Profile/test.cs" Line="9" Column="34" />
+      <File FileName="Assets/Resources/Scripts/Profile/ButtonDetection.cs" Line="20" Column="1" />
       <File FileName="Assets/Resources/Scripts/Profile/ButtonAnchor.cs" Line="17" Column="3" />
+      <File FileName="Assets/Resources/Scripts/Profile/SetMaterialOffset.cs" Line="11" Column="47" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -25,7 +24,7 @@
               <Node name="Resources" expanded="True">
                 <Node name="Scripts" expanded="True">
                   <Node name="Profile" expanded="True">
-                    <Node name="ButtonReaction.cs" selected="True" />
+                    <Node name="SetMaterialOffset.cs" selected="True" />
                   </Node>
                 </Node>
               </Node>

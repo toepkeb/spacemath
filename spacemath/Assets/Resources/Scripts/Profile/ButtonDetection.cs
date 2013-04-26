@@ -21,14 +21,15 @@ public class ButtonDetection : MonoBehaviour {
 			RaycastHit[] hits = Physics.RaycastAll(ray);
 			
 			bool touchingButton = false;
-			
 			for (int i=0; i < hits.Length;i++)
 			{
 				ButtonAnchor button = hits[i].transform.gameObject.GetComponent<ButtonAnchor>();
-				if ((lastButton != null && lastButton != button) || !canClick)
-					continue;
 				
-				if (button != null && button.enabled)
+				if ((lastButton != null && lastButton != button) || !canClick)
+				{
+					continue;
+				}
+				if (button != null && button.active)
 				{
 					touchingButton = true;
 					if (Input.GetMouseButtonDown(0))
@@ -39,6 +40,8 @@ public class ButtonDetection : MonoBehaviour {
 					else if (Input.GetMouseButtonUp(0))
 					{
 						button.Click();
+						canClick = true;
+						lastButton = null;
 					}
 					else
 					{

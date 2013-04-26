@@ -6,6 +6,7 @@ public class ButtonReaction : MonoBehaviour {
 	public float sizeChange;
 	public float changeTime;
 	public string activeTexturePath;
+	public AnimationClip animationClip;
 	
 	public bool useForBounds;
 	bool touching;
@@ -22,6 +23,15 @@ public class ButtonReaction : MonoBehaviour {
 			gameObject.AddComponent<BoxCollider>();
 		}
 		
+		if (animationClip && !GetComponent<Animation>())
+		{
+			gameObject.AddComponent<Animation>();
+			gameObject.animation.AddClip(animationClip,animationClip.name);
+			gameObject.animation.clip = animationClip;
+			gameObject.animation.playAutomatically = false;
+			gameObject.animation.wrapMode = WrapMode.Once;
+		}
+		
 		if (transform.parent != null)
 		{
 			parent = transform.parent;
@@ -32,6 +42,13 @@ public class ButtonReaction : MonoBehaviour {
 		{
 			startingTexture = gameObject.renderer.material.mainTexture;
 		}
+	}
+	
+	void OnEnabled()
+	{
+		parent.localScale = startSize;
+		gameObject.renderer.material.mainTexture = startingTexture;
+		touching = false;
 	}
 	
 	// Update is called once per frame
@@ -65,6 +82,9 @@ public class ButtonReaction : MonoBehaviour {
 		{
 			gameObject.renderer.material.mainTexture = startingTexture;
 		}
+		
+		if (animationClip)
+			gameObject.animation.Play();
 	}
 	
 	public void Canceled()
@@ -80,11 +100,13 @@ public class ButtonReaction : MonoBehaviour {
 	void Resize()
 	{
 		if (parent.localScale == startSize - Vector3.one*sizeChange || parent == null || changeTime == 0)
+		{
 			return;
-		
+		}
 		float delta = sizeChange *Time.deltaTime/ changeTime;
+		
 		parent.localScale -= new Vector3(delta,delta,delta);	
-		if (Mathf.Abs (startSize.x-parent.localScale.x - sizeChange)  < delta)
+		if (Mathf.Abs (startSize.x-parent.localScale.x - sizeChange)  < Mathf.Abs(delta))
 		{
 			parent.localScale = startSize - Vector3.one*sizeChange;
 		}
@@ -97,7 +119,7 @@ public class ButtonReaction : MonoBehaviour {
 		
 		float delta = sizeChange *Time.deltaTime/ changeTime;
 		parent.localScale += new Vector3(delta,delta,delta);	
-		if (Mathf.Abs(parent.localScale.x - startSize.x) < delta)
+		if (Mathf.Abs(parent.localScale.x - startSize.x) < Mathf.Abs(delta))
 		{
 			parent.localScale = startSize;
 		}

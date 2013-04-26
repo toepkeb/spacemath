@@ -3,21 +3,21 @@ using System.Collections;
 
 public class ProfileManager : MonoBehaviour {
 	
+	public GameObject profileBoard;
+	
+	ProfileCamera profileCamera;
 	GameObject[] avatars;
 	GameObject avatarParent;
-	public GameObject profileBoard;
 	float avatarOffset = 3;
-	Vector2 startPosition;
-	float startTime;
-	Vector2 previousPosition;
-	Vector3 target;
-	int selection;
+	bool startedAnimation;
+	int crewMembersSelected;
 	
-	enum State
+	public enum ProfileManagerState
 	{
-		SelectProfile, CreateName, SelectAvatar, SelectOutfit, SelectCrew, ConnectToJuddly, Stats
+		SelectProfile, CreateName, SelectAvatar, SelectOutfit, SelectCrew, ConnectToJuddly, Stats, Moving, AvatarComplete
 	}
-	State state;
+	public static ProfileManagerState state;
+	public static ProfileManagerState nextState;
 	
 	Profile[] profiles;
 	Profile currentProfile;
@@ -26,40 +26,49 @@ public class ProfileManager : MonoBehaviour {
 	public ButtonAnchor[] newButtons;
 	public ButtonAnchor[] deleteButtons;
 	public ButtonAnchor[] playButtons;
+	public ButtonAnchor[] backButtons;
+	public ButtonAnchor[] crewButtons;
+//	public ButtonAnchor acceptNameButton;
+	public ButtonAnchor acceptButton;
 	
 	// Use this for initialization
 	void Start () {
 		//PlayerPrefs.DeleteAll();
+		profileCamera = Camera.main.GetComponent<ProfileCamera>();
+		
 		profiles = new Profile[4];
 		for (int i=0; i < profiles.Length;i++)
 		{
 			profiles[i] = new Profile();
 			profiles[i].LoadProfile(i);
+	float avatarOffset = 3;
 			SetProfileBoard(i);
 		}
 		
+		
 		SkillDataBase.SetSkills();
 		
-		SetButtonActive(true);
+		SetProfileBoardButtonActive(true);
 		
-		//SetProfileBoard();
+		acceptButton.gameObject.SetActive(false);
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
-		if (state == State.SelectProfile)
+	void Update () 
+	{
+		#region Select Profile
+		if (state == ProfileManagerState.SelectProfile)
 		{
 			for (int i=0; i < newButtons.Length;i++)
 			{
 				if (newButtons[i].DetectClick())
 				{
-					Debug.Log ("clicked");
 					currentProfileIndex = i;
-					state = State.CreateName;
+					state = ProfileManagerState.Moving;
+					nextState = ProfileManagerState.CreateName;
 					profiles[currentProfileIndex].CreateProfile(i);
-					target = Vector3.zero;
-					SetButtonActive(false);
+					SetProfileBoardButtonActive(false);
+					profileCamera.SetMove();
 				}
 			}
 			for (int i=0; i< deleteButtons.Length;i++)
@@ -77,51 +86,140 @@ public class ProfileManager : MonoBehaviour {
 				}
 			}
 		}
-		if (state == State.SelectAvatar)
+		#endregion
+		#region Create Name
+		else if (state == ProfileManagerState.CreateName)
 		{
-			if (Input.GetMouseButtonDown(0))
+			acceptButton.gameObject.SetActive(true);
+			if (acceptButton.DetectClick())
 			{
-				previousPosition = Input.mousePosition;
-				startTime = Time.time;
-				startPosition = Input.mousePosition;
-			}
-			else if (Input.GetMouseButton(0))
-			{
-				avatarParent.transform.position += new Vector3((-previousPosition.x+Input.mousePosition.x)/100,0,0);
-				previousPosition = Input.mousePosition;
-			}
-			else if (Input.GetMouseButtonUp(0))
-			{
-				float vel = (Input.mousePosition.x - startPosition.x)/(Time.time-startTime);
-				vel /=Screen.width;
 				
-				if (Mathf.Abs(Input.mousePosition.x - startPosition.x) > Screen.width*.25f)
+				if (avatars == null)
 				{
-					selection = (int)((avatarParent.transform.position.x-avatarOffset/2)/avatarOffset);
-				}
-				else if (Mathf.Abs(vel) > .4f)
-				{
-					//int offset = (int)((avatarParent.transform.position.x-avatarOffset/2)/avatarOffset);
-					if (vel >0)
+//					avatarParent = new GameObject();
+					avatars = LoadAvatars();
+					GameObject platforms = GameObject.Find ("AvatarPlatforms");
+					
+					for (int i=0; i < avatars.Length;i++)
 					{
-						selection ++;
+						avatars[i] = (GameObject)GameObject.Instantiate(avatars[i],new Vector3(i*avatarOffset,0,0),Quaternion.identity);
+						avatars[i].transform.parent = platforms.transform.FindChild(i.ToString());
 					}
-					else
-					{
-						selection --;
-					}
-					Debug.Log ("swipe");
 				}
-				Debug.Log ("2 " + selection);
-				selection = Mathf.Clamp(selection,-avatars.Length+1,0);
-				Debug.Log ("3 " + selection);
-				target = new Vector3(selection*avatarOffset,0,0);
+				
+				state = ProfileManagerState.Moving;
+				nextState = ProfileManagerState.SelectAvatar;
+				profileCamera.SetMove();
+				acceptButton.gameObject.SetActive(false);
 			}
-			else
+			
+			for (int i=0; i < backButtons.Length;i++)
 			{
-				avatarParent.transform.position = Vector3.Lerp (avatarParent.transform.position,target,.1f);
+				if (backButtons[i].DetectClick())
+				{
+					profiles[i].DeleteProfile(i);
+					SetProfileBoard(i);
+					state = ProfileManagerState.Moving;
+					nextState = ProfileManagerState.SelectProfile;
+					profileCamera.SetMove();
+					SetProfileBoardButtonActive(true);
+					acceptButton.gameObject.SetActive(false);
+				}
 			}
-		}	
+		}
+		#endregion
+		
+		#region Select Avatar
+		else if (state == ProfileManagerState.SelectAvatar)
+		{
+			acceptButton.gameObject.SetActive(true);
+			
+			if (acceptButton.DetectClick())
+			{
+				profileCamera.SetZoomIn();
+				state = ProfileManagerState.Moving;
+				nextState = ProfileManagerState.SelectOutfit;
+				acceptButton.gameObject.SetActive(false);
+				profiles[currentProfileIndex].AvatarType = (Profile.Avatar)profileCamera.selection;
+			}
+		}
+		#endregion
+		
+		#region Select Crew
+		else if (state == ProfileManagerState.SelectOutfit)
+		{
+			acceptButton.gameObject.SetActive(true);
+			
+			if (acceptButton.DetectClick())
+			{
+				profileCamera.SetZoomOut();
+				state = ProfileManagerState.Moving;
+				nextState = ProfileManagerState.AvatarComplete;
+				acceptButton.gameObject.SetActive(false);
+			}
+		}
+		#endregion
+		
+		#region Animation
+		else if (state == ProfileManagerState.AvatarComplete)
+		{
+			if (!startedAnimation)
+			{
+				avatars[profileCamera.selection].transform.parent.animation.Play ();
+				startedAnimation = true;
+			}
+			else 
+			{
+				if (!avatars[profileCamera.selection].transform.parent.animation.isPlaying)
+				{
+					avatars[profileCamera.selection].transform.parent.gameObject.SetActive(false);
+					state = ProfileManagerState.Moving;
+					nextState = ProfileManagerState.SelectCrew;
+					acceptButton.gameObject.SetActive(false);
+					SetCrewButtonActive(true);
+					crewButtons[profileCamera.selection].active = false;
+					profileCamera.SetMove();
+				}
+			}
+		}
+		#endregion
+		else if (state == ProfileManagerState.SelectCrew)
+		{
+			for (int i=0; i < crewButtons.Length;i++)
+			{
+				if (crewButtons[i].DetectClick())
+				{
+					if (avatars[i].transform.parent.position.y == .5f)
+					{
+						avatars[i].transform.parent.position = new Vector3(avatars[i].transform.parent.position.x,-.5f,avatars[i].transform.parent.position.z);
+						crewMembersSelected --;
+					}
+					else if (avatars[i].transform.parent.position.y == -.5f)
+					{
+						avatars[i].transform.parent.position = new Vector3(avatars[i].transform.parent.position.x,.5f,avatars[i].transform.parent.position.z);
+						crewMembersSelected++;
+					}
+				}
+			}
+			
+			if (crewMembersSelected == 3)
+				acceptButton.gameObject.SetActive(true);
+			else
+				acceptButton.gameObject.SetActive(false);
+			
+			if (acceptButton.DetectClick())
+			{
+				SetCrewButtonActive(false);
+				state = ProfileManagerState.Moving;
+				nextState = ProfileManagerState.SelectProfile;
+				profileCamera.SetMove();
+				acceptButton.gameObject.SetActive(false);
+				profiles[currentProfileIndex].SaveProfile();
+				SetProfileBoard(currentProfileIndex);
+				SetProfileBoardButtonActive(true);
+			}
+		}
+		
 	}
 	
 	void OnGUI()
@@ -129,7 +227,7 @@ public class ProfileManager : MonoBehaviour {
 		switch(state)
 		{
 			#region Select Profile
-			case State.SelectProfile:
+			case ProfileManagerState.SelectProfile:
 //			for (int i=0; i < 4;i++)
 //			{
 //				Rect box = new Rect(50 + 250*(i%2), 50 + 250 *(i/2),250,250);
@@ -173,29 +271,29 @@ public class ProfileManager : MonoBehaviour {
 			break;
 			#endregion
 			#region CreateName
-			case State.CreateName:
-			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Nickname");
+			case ProfileManagerState.CreateName:			
 			profiles[currentProfileIndex].Name = GUI.TextField( new Rect(Screen.width*.5f - 150,Screen.height*.5f,300,50),profiles[currentProfileIndex].Name);
-			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
-			{
-				state = State.SelectAvatar;
-				
-				if (avatars == null)
-				{
-					avatarParent = new GameObject();
-					avatars = LoadAvatars();
-					
-					for (int i=0; i < avatars.Length;i++)
-					{
-						avatars[i] = (GameObject)GameObject.Instantiate(avatars[i],new Vector3(i*avatarOffset,0,0),Quaternion.identity);
-						avatars[i].transform.parent = avatarParent.transform;
-					}
-				}
-			}
+//			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Nickname");
+//			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
+//			{
+//				state = ProfileManagerState.SelectAvatar;
+//				
+//				if (avatars == null)
+//				{
+//					avatarParent = new GameObject();
+//					avatars = LoadAvatars();
+//					
+//					for (int i=0; i < avatars.Length;i++)
+//					{
+//						avatars[i] = (GameObject)GameObject.Instantiate(avatars[i],new Vector3(i*avatarOffset,0,0),Quaternion.identity);
+//						avatars[i].transform.parent = avatarParent.transform;
+//					}
+//				}
+//			}
 			break;
 			#endregion
 			#region SelectAvatar
-			case State.SelectAvatar:
+			case ProfileManagerState.SelectAvatar:
 			
 //			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Avatar");
 //			for (int i=0; i < 8;i++)
@@ -210,72 +308,72 @@ public class ProfileManager : MonoBehaviour {
 			
 			
 			
-			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
-			{
-				profiles[currentProfileIndex].AvatarType = (Profile.Avatar)(selection*-1);
-				state = State.SelectOutfit;
-			}
+//			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
+//			{
+//				profiles[currentProfileIndex].AvatarType = (Profile.Avatar)(selection*-1);
+//				state = ProfileManagerState.SelectOutfit;
+//			}
 			break;
 			#endregion
 			#region SelectOutfit
-			case State.SelectOutfit:
-			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Outfit");
-			for (int i=0; i < 8;i++)
-			{
-				Rect imgRect = new Rect(200+(i*80),Screen.height*.5f,80,80);
-				if (GUI.Button(imgRect,i.ToString()))
-				{
-					profiles[currentProfileIndex].Outfit = i;
-				}
-			}
-			
-			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
-			{
-				state = State.ConnectToJuddly;
-			}
+			case ProfileManagerState.SelectOutfit:
+//			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Outfit");
+//			for (int i=0; i < 8;i++)
+//			{
+//				Rect imgRect = new Rect(200+(i*80),Screen.height*.5f,80,80);
+//				if (GUI.Button(imgRect,i.ToString()))
+//				{
+//					profiles[currentProfileIndex].Outfit = i;
+//				}
+//			}
+//			
+//			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
+//			{
+//				state = ProfileManagerState.ConnectToJuddly;
+//			}
 			break;
 			#endregion
 			#region Select Crew
-			case State.SelectCrew:
-			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Outfit");
-			for (int i=0; i < 8;i++)
-			{
-				Rect imgRect = new Rect(200+(i*80),Screen.height*.5f,80,80);
-				if (GUI.Button(imgRect,i.ToString()))
-				{
-					profiles[currentProfileIndex].Outfit = i;
-				}
-			}
-			
-			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
-			{
-				state = State.ConnectToJuddly;
-			}
+			case ProfileManagerState.SelectCrew:
+			//GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Select your Outfit");
+//			for (int i=0; i < 8;i++)
+//			{
+//				Rect imgRect = new Rect(200+(i*80),Screen.height*.5f,80,80);
+//				if (GUI.Button(imgRect,i.ToString()))
+//				{
+//					profiles[currentProfileIndex].Outfit = i;
+//				}
+//			}
+//			
+//			if (GUI.Button (new Rect(Screen.width*.5f -30,Screen.height*.6f, 60,50),"Continue"))
+//			{
+//				state = ProfileManagerState.ConnectToJuddly;
+//			}
 			break;
 			#endregion
 			#region ConnectToJuddly
-			case State.ConnectToJuddly:
+			case ProfileManagerState.ConnectToJuddly:
 			GUI.Label(new Rect(Screen.width*.5f - 150, Screen.height*.4f, 300,50),"Connect to Juddly");
 			
 			if (GUI.Button(new Rect(Screen.width*.4f-30,Screen.height* .5f,60,50),"Yes"))
 			{
-				state = State.SelectProfile;
+				state = ProfileManagerState.SelectProfile;
 				profiles[currentProfileIndex].SaveProfile();
 				SetProfileBoard(currentProfileIndex);
-				SetButtonActive(true);
+				SetProfileBoardButtonActive(true);
 			}
 			if (GUI.Button(new Rect(Screen.width*.6f-30, Screen.height*.5f,60,50),"NO"))
 			{
-				state = State.SelectProfile;
+				state = ProfileManagerState.SelectProfile;
 				SetProfileBoard(currentProfileIndex);
 				profiles[currentProfileIndex].SaveProfile();
-				SetButtonActive(true);	
+				SetProfileBoardButtonActive(true);	
 			}
 		
 			break;
-			#endregion
+			#endregion	
 			#region Stats
-			case State.Stats:
+			case ProfileManagerState.Stats:
 			if (GUI.Button (new Rect(150,150,100,100),"1"))
 			{
 				profiles[currentProfileIndex].Stats.AddProgress("One",1);
@@ -299,7 +397,7 @@ public class ProfileManager : MonoBehaviour {
 			
 			if (GUI.Button (new Rect(500,50,100,100),"Back"))
 			{
-				state = State.SelectProfile;
+				state = ProfileManagerState.SelectProfile;
 				profiles[currentProfileIndex].Stats.SaveStats();
 			}
 			if (GUI.Button( new Rect(610,50,100,100),"Skills"))
@@ -396,7 +494,7 @@ public class ProfileManager : MonoBehaviour {
 		}
 	}
 	
-	void SetButtonActive(bool on)
+	void SetProfileBoardButtonActive(bool on)
 	{
 		for (int i=0; i < newButtons.Length;i++)
 		{
@@ -410,5 +508,18 @@ public class ProfileManager : MonoBehaviour {
 		{
 			playButtons[i].active = on;
 		}
+	}
+	
+	void SetCrewButtonActive(bool on)
+	{
+		for (int i=0; i < crewButtons.Length;i++)
+		{
+			crewButtons[i].active = on;
+		}
+	}
+	
+	public static void SetNextState()
+	{
+		state = nextState;
 	}
 }
