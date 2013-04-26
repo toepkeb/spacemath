@@ -3,7 +3,7 @@ using System.Collections;
 //Change 1
 //Added changed2 for test
 public class ProfileManager : MonoBehaviour {
-	//blah blah blah change 3
+	//blah blah blah KAY
 	public GameObject profileBoard;
 	
 	ProfileCamera profileCamera;
