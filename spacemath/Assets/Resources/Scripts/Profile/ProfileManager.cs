@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class ProfileManager : MonoBehaviour {
-	
+	//blah blah blah
 	public GameObject profileBoard;
 	
 	ProfileCamera profileCamera;
