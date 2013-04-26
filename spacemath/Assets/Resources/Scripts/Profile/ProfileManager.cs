@@ -1,9 +1,11 @@
 using UnityEngine;
 using System.Collections;
-
-//Added changed for test
+//i hate life
+//and ben
+//and frank
+//Added changed for test KAY
 public class ProfileManager : MonoBehaviour {
-	//blah blah blah
+	//blah blah blah KAY
 	public GameObject profileBoard;
 	
 	ProfileCamera profileCamera;
