@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+//Added comment for test
 public class ProfileManager : MonoBehaviour {
 	//blah blah blah
 	public GameObject profileBoard;
