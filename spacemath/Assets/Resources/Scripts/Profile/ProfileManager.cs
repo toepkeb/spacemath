@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections;
-
-//Added changed for test
+//Change 1
+//Added changed2 for test
 public class ProfileManager : MonoBehaviour {
-	//blah blah blah
+	//blah blah blah change 3
 	public GameObject profileBoard;
 	
 	ProfileCamera profileCamera;
