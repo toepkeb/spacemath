@@ -44,6 +44,10 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Resources\Scripts\Environment\CreateSolarFlare.cs" />
+     <Compile Include="Assets\Resources\Scripts\Flying\CalculateShipDirection.cs" />
+     <Compile Include="Assets\Resources\Scripts\Flying\ChangeMaterialOffset.cs" />
+     <Compile Include="Assets\Resources\Scripts\Flying\PerlinNoiseDeform.cs" />
      <Compile Include="Assets\Resources\Scripts\Helper\CallLevelLoad.cs" />
      <Compile Include="Assets\Resources\Scripts\Helper\FadeInOut.cs" />
      <Compile Include="Assets\Resources\Scripts\Helper\HelperFunctions.cs" />

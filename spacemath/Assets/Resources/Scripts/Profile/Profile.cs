@@ -64,6 +64,11 @@ public class Profile {
 		PlayerPrefs.DeleteKey(identifier+ "JuddlyUID");
 		PlayerPrefs.DeleteKey(identifier+ "JuddlyCID");
 		
+		for (int i=0; i < crew.Length;i++)
+		{
+			PlayerPrefs.DeleteKey(identifier + "Crew" + i);
+		}
+		
 		stats.DeleteStats();
 	}
 	
@@ -90,11 +95,11 @@ public class Profile {
 		avatar = (Avatar)PlayerPrefs.GetInt(identifier + "Avatar");
 		outfit = PlayerPrefs.GetInt(identifier + "Outfit");
 		
-//		crew = new Avatar[3];
-//		for (int i=0; i < crew.Length;i++)
-//		{
-//			crew[i] = (Avatar)PlayerPrefs.GetInt(identifier + "Crew" + i);
-//		}
+		crew = new Avatar[3];
+		for (int i=0; i < crew.Length;i++)
+		{
+			crew[i] = (Avatar)PlayerPrefs.GetInt(identifier + "Crew" + i);
+		}
 		
 		stats = new StatManager();
 		stats.LoadStats(index);
@@ -114,10 +119,10 @@ public class Profile {
 		PlayerPrefs.SetString (identifier + "Name",nickName);
 		PlayerPrefs.SetInt(identifier + "Avatar",(int)avatar);
 		PlayerPrefs.SetInt(identifier + "Outfit",outfit);
-//		for (int i=0; i < crew.Length;i++)
-//		{
-//			PlayerPrefs.SetInt(identifier + "Crew" + i, (int)crew[i]);
-//		}
+		for (int i=0; i < crew.Length;i++)
+		{
+			PlayerPrefs.SetInt(identifier + "Crew" + i, (int)crew[i]);
+		}
 		
 		stats.SaveStats();
 		

@@ -117,13 +117,11 @@ public class ProfileCamera : MonoBehaviour {
 		frameTop.transform.localPosition += Vector3.down *direction *.02f;
 		if (frameBot.transform.localPosition.y < -2)
 		{
-		Debug.Log ("stop animate1");
 			frameBot.transform.localPosition = new Vector3(frameBot.transform.localPosition.x,-2,frameBot.transform.localPosition.z);
 			frameTop.transform.localPosition = new Vector3(frameTop.transform.localPosition.x,4.5f,frameTop.transform.localPosition.z);
 		}
 		else if (frameBot.transform.localPosition.y > -1)
 		{
-		Debug.Log ("stop animate1");
 			frameBot.transform.localPosition = new Vector3(frameBot.transform.localPosition.x,-1,frameBot.transform.localPosition.z);
 			frameTop.transform.localPosition = new Vector3(frameTop.transform.localPosition.x,3.5f,frameTop.transform.localPosition.z);
 		}

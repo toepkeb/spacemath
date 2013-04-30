@@ -12,6 +12,7 @@ public class ProfileManager : MonoBehaviour {
 	float avatarOffset = 3;
 	bool startedAnimation;
 	int crewMembersSelected;
+	Profile.Avatar[] crew;
 	
 	public enum ProfileManagerState
 	{
@@ -36,13 +37,14 @@ public class ProfileManager : MonoBehaviour {
 	void Start () {
 		//PlayerPrefs.DeleteAll();
 		profileCamera = Camera.main.GetComponent<ProfileCamera>();
+		crew = new Profile.Avatar[3];
 		
 		profiles = new Profile[4];
 		for (int i=0; i < profiles.Length;i++)
 		{
 			profiles[i] = new Profile();
 			profiles[i].LoadProfile(i);
-	float avatarOffset = 3;
+			float avatarOffset = 3;
 			SetProfileBoard(i);
 		}
 		
@@ -52,6 +54,7 @@ public class ProfileManager : MonoBehaviour {
 		SetProfileBoardButtonActive(true);
 		
 		acceptButton.gameObject.SetActive(false);
+		
 	}
 	
 	// Update is called once per frame
@@ -84,6 +87,7 @@ public class ProfileManager : MonoBehaviour {
 			{
 				if (playButtons[i].DetectClick())
 				{
+					CallLevelLoad.SetLevelLoad(2,.5f);
 				}
 			}
 		}
@@ -146,7 +150,7 @@ public class ProfileManager : MonoBehaviour {
 		}
 		#endregion
 		
-		#region Select Crew
+		#region Select Outfit
 		else if (state == ProfileManagerState.SelectOutfit)
 		{
 			acceptButton.gameObject.SetActive(true);
@@ -157,10 +161,10 @@ public class ProfileManager : MonoBehaviour {
 				state = ProfileManagerState.Moving;
 				nextState = ProfileManagerState.AvatarComplete;
 				acceptButton.gameObject.SetActive(false);
+				//profiles[currentProfileIndex].Outfit = 
 			}
 		}
 		#endregion
-		
 		#region Animation
 		else if (state == ProfileManagerState.AvatarComplete)
 		{
@@ -184,6 +188,7 @@ public class ProfileManager : MonoBehaviour {
 			}
 		}
 		#endregion
+		#region Select Crew
 		else if (state == ProfileManagerState.SelectCrew)
 		{
 			for (int i=0; i < crewButtons.Length;i++)
@@ -193,11 +198,13 @@ public class ProfileManager : MonoBehaviour {
 					if (avatars[i].transform.parent.position.y == .5f)
 					{
 						avatars[i].transform.parent.position = new Vector3(avatars[i].transform.parent.position.x,-.5f,avatars[i].transform.parent.position.z);
-						crewMembersSelected --;
+						RemoveCrewMember(i);
+						crewMembersSelected--;
 					}
-					else if (avatars[i].transform.parent.position.y == -.5f)
+					else if (crewMembersSelected <3 && avatars[i].transform.parent.position.y == -.5f)
 					{
 						avatars[i].transform.parent.position = new Vector3(avatars[i].transform.parent.position.x,.5f,avatars[i].transform.parent.position.z);
+						AddCrewMember(i, crewMembersSelected);
 						crewMembersSelected++;
 					}
 				}
@@ -215,11 +222,18 @@ public class ProfileManager : MonoBehaviour {
 				nextState = ProfileManagerState.SelectProfile;
 				profileCamera.SetMove();
 				acceptButton.gameObject.SetActive(false);
+				profiles[currentProfileIndex].Crew = crew;
 				profiles[currentProfileIndex].SaveProfile();
 				SetProfileBoard(currentProfileIndex);
 				SetProfileBoardButtonActive(true);
+				
+				for (int i=0; i < crew.Length;i++)
+				{
+					Debug.Log (crew[i]);
+				}
 			}
 		}
+		#endregion
 		
 	}
 	
@@ -446,52 +460,40 @@ public class ProfileManager : MonoBehaviour {
 		if (profileBoard == null)
 			return;
 		
-//		for (int i=0; i < profiles.Length;i++)
-//		{
-			if (profiles[i].Index == -1)
+		if (profiles[i].Index == -1)
+		{
+			deleteButtons[i].gameObject.SetActive(false);
+			newButtons[i].gameObject.SetActive(true);
+			playButtons[i].gameObject.SetActive(false);
+			profileBoard.transform.FindChild(i + "Name").GetComponent<TextMesh>().text = "";
+			profileBoard.transform.FindChild(i + "Avatar").GetComponent<TextMesh>().text = "";
+			profileBoard.transform.FindChild(i + "Outfit").GetComponent<TextMesh>().text = "";
+			profileBoard.transform.FindChild(i + "Grade").GetComponent<TextMesh>().text ="";
+			profileBoard.transform.FindChild(i + "Juddly").GetComponent<TextMesh>().text = "";
+			profileBoard.transform.FindChild(i + "Progress").GetComponent<TextMesh>().text = "";
+			
+			for (int j=0; j< crew.Length;j++)
 			{
-				//profileBoard.transform.FindChild(i + "New").GetComponent<TextMesh>().text = "NEW";
-				//profileBoard.transform.FindChild(i + "New").GetComponent<ButtonReaction>().enabled = true;
-				deleteButtons[i].gameObject.SetActive(false);
-				newButtons[i].gameObject.SetActive(true);
-				playButtons[i].gameObject.SetActive(false);
-				profileBoard.transform.FindChild(i + "Name").GetComponent<TextMesh>().text = "";
-				profileBoard.transform.FindChild(i + "Avatar").GetComponent<TextMesh>().text = "";
-				profileBoard.transform.FindChild(i + "Outfit").GetComponent<TextMesh>().text = "";
-				profileBoard.transform.FindChild(i + "Grade").GetComponent<TextMesh>().text ="";
-				profileBoard.transform.FindChild(i + "Juddly").GetComponent<TextMesh>().text = "";
-				profileBoard.transform.FindChild(i + "Progress").GetComponent<TextMesh>().text = "";
+				profileBoard.transform.FindChild(i+"Crew" +j).GetComponent<TextMesh>().text = "";
 			}
-			else 
+		}
+		else 
+		{
+			deleteButtons[i].gameObject.SetActive(true);
+			newButtons[i].gameObject.SetActive(false);
+			playButtons[i].gameObject.SetActive(true);
+			profileBoard.transform.FindChild(i + "Name").GetComponent<TextMesh>().text = profiles[i].Name;
+			profileBoard.transform.FindChild(i + "Avatar").GetComponent<TextMesh>().text = (profiles[i].AvatarType).ToString();
+			profileBoard.transform.FindChild(i + "Outfit").GetComponent<TextMesh>().text = (profiles[i].Outfit).ToString();
+			profileBoard.transform.FindChild(i + "Grade").GetComponent<TextMesh>().text = (profiles[i].Grade).ToString();
+			string val = (profiles[i].LinkedToJuddly == true) ? ("Yes" ): ("No");
+			profileBoard.transform.FindChild(i + "Juddly").GetComponent<TextMesh>().text = val;
+			profileBoard.transform.FindChild(i + "Progress").GetComponent<TextMesh>().text = (profiles[i].Progress).ToString() + "%";
+		
+			for (int j=0; j< crew.Length;j++)
 			{
-				//profileBoard.transform.FindChild(i + "New").GetComponent<TextMesh>().text = "";
-				//profileBoard.transform.FindChild(i + "New").GetComponent<ButtonReaction>().enabled = false;
-				deleteButtons[i].gameObject.SetActive(true);
-				newButtons[i].gameObject.SetActive(false);
-				playButtons[i].gameObject.SetActive(true);
-				profileBoard.transform.FindChild(i + "Name").GetComponent<TextMesh>().text = profiles[i].Name;
-				profileBoard.transform.FindChild(i + "Avatar").GetComponent<TextMesh>().text = (profiles[i].AvatarType).ToString();
-				profileBoard.transform.FindChild(i + "Outfit").GetComponent<TextMesh>().text = (profiles[i].Outfit).ToString();
-				profileBoard.transform.FindChild(i + "Grade").GetComponent<TextMesh>().text = (profiles[i].Grade).ToString();
-				string val = (profiles[i].LinkedToJuddly == true) ? ("Yes" ): ("No");
-				profileBoard.transform.FindChild(i + "Juddly").GetComponent<TextMesh>().text = val;
-				profileBoard.transform.FindChild(i + "Progress").GetComponent<TextMesh>().text = (profiles[i].Progress).ToString() + "%";
-//				GUI.Label (new Rect(25,50,200,30),"Name: " + profiles[i].Name);
-//				GUI.Label (new Rect(25,80,200,30),"Avatar: " + (profiles[i].AvatarType).ToString());
-//				GUI.Label (new Rect(25,110,200,30),"Outfit: " + profiles[i].Outfit);
-//				GUI.Label (new Rect(25,140,200,30),"Grade: " + profiles[i].Grade);
-//				string val = (profiles[i].LinkedToJuddly == true) ? ("Yes" ): ("No");
-//				GUI.Label (new Rect(25,170,200,30),"Connected to Juddly: " + val);
-//			
-//				if (GUI.Button (new Rect(65,200,120,30),"Delete"))
-//				{
-//					profiles[i].DeleteProfile(i);
-//				}
-//				if (GUI.Button (new Rect(10,200,50,30),"Stats"))
-//				{
-//					state = State.Stats;
-//				}
-//			}
+				profileBoard.transform.FindChild(i+"Crew" +j).GetComponent<TextMesh>().text = profiles[i].Crew[j].ToString();
+			}
 		}
 	}
 	
@@ -522,5 +524,21 @@ public class ProfileManager : MonoBehaviour {
 	public static void SetNextState()
 	{
 		state = nextState;
+	}
+	
+	void AddCrewMember(int selection, int index)
+	{
+		crew[index] = (Profile.Avatar)selection;
+	}
+	
+	void RemoveCrewMember(int selection)
+	{
+		for (int i=0; i < crew.Length;i++)
+		{
+			if (crew[i] == (Profile.Avatar)selection)
+			{
+				crew[i] = Profile.Avatar.Null;
+			}
+		}
 	}
 }
