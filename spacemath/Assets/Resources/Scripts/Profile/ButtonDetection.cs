@@ -29,7 +29,7 @@ public class ButtonDetection : MonoBehaviour {
 				{
 					continue;
 				}
-				if (button != null && button.active)
+				if (button != null && button.isActive)
 				{
 					touchingButton = true;
 					if (Input.GetMouseButtonDown(0))

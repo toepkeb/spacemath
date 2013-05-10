@@ -17,7 +17,7 @@ public class CalculateShipDirection : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void LateUpdate () {
 	
 		//Debug.DrawRay(_transform.position,-_transform.up*100,Color.red);
 		//Debug.DrawRay(_transform.position,transform.right*100,Color.green);
@@ -34,22 +34,26 @@ public class CalculateShipDirection : MonoBehaviour {
 		Debug.DrawRay(_transform.position,Vector3.Cross(down,right)*100,Color.blue);
 		
 		
-		_transform.position += _transform.forward*.6f;
-		_transform.forward = Vector3.Lerp (_transform.forward,(forward1+forward2)/2,.02f);
+//		_transform.forward = Vector3.Lerp (_transform.forward,(forward1+forward2)/2,.03f);
+		_transform.forward = Vector3.RotateTowards(_transform.forward,(forward1+forward2)/2,.005f,.005f);
+//		_transform.rotation = HelperFunctions.TurnTowardsTarget(_transform,_transform.position+ (forward1+forward2)/2,.01f);
 		
-		if (Input.GetKey(KeyCode.A))
-			_transform.position += -transform.right*1f;
-		if (Input.GetKey(KeyCode.D))
-			_transform.position += transform.right*1f;
-		if (Input.GetKey(KeyCode.W))
-			_transform.position += transform.up*1f;
-		if (Input.GetKey(KeyCode.S))
-			_transform.position += -transform.up*1f;
+		Vector3 dest = _transform.position + _transform.forward*.5f;
+		_transform.position = Vector3.Lerp (_transform.position,dest,.2f);
+//		_transform.position += Vector3.forward *.05f;
+//		if (Input.GetKey(KeyCode.A))
+//			_transform.position += -transform.right*1f;
+//		if (Input.GetKey(KeyCode.D))
+//			_transform.position += transform.right*1f;
+//		if (Input.GetKey(KeyCode.W))
+//			_transform.position += transform.up*1f;
+//		if (Input.GetKey(KeyCode.S))
+//			_transform.position += -transform.up*1f;
 	}
 	
 	void CalculateNormals()
 	{
-		Ray ray = new Ray(_transform.position,_transform.up);
+		Ray ray = new Ray(_transform.position,_transform.up+_transform.forward*.5f);
 		RaycastHit[] hits;
 		hits = Physics.RaycastAll(ray,100);
 		for (int i=0; i < hits.Length;i++)
@@ -57,41 +61,41 @@ public class CalculateShipDirection : MonoBehaviour {
 			if (hits[i].collider.tag == "Tube")
 			{
 				up = hits[i].normal;
-				Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
+				//Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
 			}
 		}
 		
-		ray = new Ray(_transform.position,-transform.up);
+		ray = new Ray(_transform.position,-transform.up+_transform.forward*.5f);
 		hits = Physics.RaycastAll(ray);	
 		for (int i=0; i < hits.Length;i++)
 		{
 			if (hits[i].collider.tag == "Tube")
 			{
 				down = hits[i].normal;
-				Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
+				//Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
 			}
 		}
 		
 		
-		ray = new Ray(_transform.position,transform.right);
+		ray = new Ray(_transform.position,transform.right+_transform.forward*.5f);
 		hits = Physics.RaycastAll(ray);	
 		for (int i=0; i < hits.Length;i++)
 		{
 			if (hits[i].collider.tag == "Tube")
 			{
 				right = hits[i].normal;
-				Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
+				//Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
 			}
 		}
 		
-		ray = new Ray(_transform.position,-transform.right);
+		ray = new Ray(_transform.position,-transform.right+_transform.forward*.5f);
 		hits = Physics.RaycastAll(ray);
 		for (int i=0; i < hits.Length;i++)
 		{
 			if (hits[i].collider.tag == "Tube")
 			{
 				left = hits[i].normal;
-				Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
+				//Debug.DrawRay(hits[i].point,hits[i].normal*30,Color.white);
 			}
 		}
 		

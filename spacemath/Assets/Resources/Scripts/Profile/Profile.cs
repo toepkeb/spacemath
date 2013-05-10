@@ -17,6 +17,7 @@ public class Profile {
 	Avatar[] crew;
 	StatManager stats;
 	int grade;
+	int planet;
 	bool linkedToJuddly;
 	int juddlyUID;
 	int juddlyCID;
@@ -27,7 +28,7 @@ public class Profile {
 	public int Outfit { get { return outfit;} set{ outfit = value;}}
 	public Avatar[] Crew { get {return crew;} set{crew = value;}}
 	public int Grade { get { return grade;} set{grade = value;}}
-	public float Progress { get { return CalculateGameProgress();}}
+	public int Planet { get { return planet;} set{planet = value;}}
 	public bool LinkedToJuddly{ get { return linkedToJuddly;}}
 	public StatManager Stats {get { return stats;}}
 	

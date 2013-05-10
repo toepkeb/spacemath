@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ButtonAnchor : MonoBehaviour {
 	
-	public bool active;
+	public bool isActive;
 	public bool clicked;
 	
 	Transform[] children;
@@ -35,7 +35,7 @@ public class ButtonAnchor : MonoBehaviour {
 	
 	public void Click()
 	{
-		if (!active)
+		if (!isActive)
 			return;
 		
 		clicked = true;
@@ -50,7 +50,7 @@ public class ButtonAnchor : MonoBehaviour {
 	
 	public void TouchDown()
 	{
-		if (!active)
+		if (!isActive)
 			return;
 		
 		touching = true;
@@ -67,7 +67,7 @@ public class ButtonAnchor : MonoBehaviour {
 	
 	public void ButtonHeld()
 	{
-		if (!active)
+		if (!isActive)
 			return;
 		
 		touching = true;
@@ -76,7 +76,7 @@ public class ButtonAnchor : MonoBehaviour {
 	
 	public void Canceled()
 	{
-		if (!active || touching == false)
+		if (!isActive || touching == false)
 			return;
 		
 		touching = false;

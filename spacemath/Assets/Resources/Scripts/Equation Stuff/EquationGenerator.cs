@@ -22,6 +22,7 @@ public class EquationGenerator : MonoBehaviour {
 	void Start () {
 		//CreateEquation(min, max, Random.Range(2,6),count, false);
 		
+		EquationCache.SharedCache.equationCount = 10;
 		EquationCache.SharedCache.SetEquations();
 		currentEquationIndex = 0;
 		currentEquation = EquationCache.SharedCache.GetEquation(currentEquationIndex);

@@ -9,6 +9,8 @@ public class Skill{
 	float progress;
 	float maxProgress;
 	bool mastered;
+	bool loaded;
+	int user;
 	
 	public int Type {get {return type;}}
 	public int Value{get {return val;}}
@@ -20,15 +22,23 @@ public class Skill{
 		this.type = type;
 		this.val = val;
 		this.maxProgress = max;
+		loaded = false;
 	}
 	
-	public void AddProgress(float amt)
+	public void AddProgress(int user, float amt)
 	{
+		if (!loaded)
+			LoadSkill(user);
+		
 		progress += amt;
 		
-		if (progress > 1)
+		if (!mastered && progress > maxProgress)
+		{
 			mastered = true;
+			Debug.Log ("Skill mastered!");
+		}
 		
+		SaveSkill(this.user);
 	}
 	
 	public void SaveSkill(int user)
@@ -38,7 +48,15 @@ public class Skill{
 	
 	public void LoadSkill(int user)
 	{
+		if (loaded)
+			return;
+		
 		progress = PlayerPrefs.GetFloat(user.ToString() + type.ToString() + val.ToString());
+		loaded = true;
+		this.user = user;
+		
+		if (progress > maxProgress)
+			mastered = true;
 	}
 	
 	public void DeleteSkill(int user)
@@ -165,11 +183,13 @@ public class SkillDataBase
 		skills.Add("6/7",new Skill(6,7,2));
 		skills.Add("6/8",new Skill(6,8,2));
 		skills.Add("6/9",new Skill(6,9,2));
+		
 	}
 	
 	public static Skill GetSkill(int type, int val)
 	{
 		Skill ret = (Skill)skills[type.ToString()+"/"+val.ToString()];
+		
 		ret.LoadSkill(ProfileManager.currentProfileIndex);
 		
 		return ret;

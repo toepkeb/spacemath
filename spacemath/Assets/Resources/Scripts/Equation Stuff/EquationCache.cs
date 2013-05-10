@@ -5,12 +5,11 @@ public class EquationCache {
 	
 	static EquationCache sharedCache;
 	public Equation[] equationCache;
-	int equationCount = 10;
+	public int equationCount;
 	
 	// Use this for initialization
 	void Start () {
-		if (GameObject.Find ("SpawnPoints"))
-			equationCache = new Equation[GameObject.Find ("SpawnPoints").transform.childCount];
+		
 	}
 	
 	// Update is called once per frame
@@ -42,9 +41,10 @@ public class EquationCache {
 		}
 	}
 	
-	public void ChangeSingleEquation(int index)
+	public Equation ChangeSingleEquation(int index)
 	{
 		equationCache[index] = new Equation(GetLesson(1,1), GetNumOfAnswers());
+		return equationCache[index];
 	}
 	
 	Lesson GetLesson(int grade, int planet)

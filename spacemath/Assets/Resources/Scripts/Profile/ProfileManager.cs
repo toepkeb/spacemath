@@ -22,7 +22,7 @@ public class ProfileManager : MonoBehaviour {
 	public static ProfileManagerState nextState;
 	
 	Profile[] profiles;
-	Profile currentProfile;
+	public static Profile currentProfile;
 	public static int currentProfileIndex;
 	
 	public ButtonAnchor[] newButtons;
@@ -36,6 +36,8 @@ public class ProfileManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//PlayerPrefs.DeleteAll();
+		if (!PlayerPrefs.HasKey("CurrentProfile"))
+			PlayerPrefs.SetInt("CurrentProfile",-1);
 		profileCamera = Camera.main.GetComponent<ProfileCamera>();
 		crew = new Profile.Avatar[3];
 		
@@ -44,7 +46,7 @@ public class ProfileManager : MonoBehaviour {
 		{
 			profiles[i] = new Profile();
 			profiles[i].LoadProfile(i);
-			float avatarOffset = 3;
+//			float avatarOffset = 3;
 			SetProfileBoard(i);
 		}
 		
@@ -87,7 +89,10 @@ public class ProfileManager : MonoBehaviour {
 			{
 				if (playButtons[i].DetectClick())
 				{
-					CallLevelLoad.SetLevelLoad(2,.5f);
+					currentProfile = profiles[i];
+					currentProfileIndex = i;
+					PlayerPrefs.SetInt("CurrentProfile",i);
+					CallLevelLoad.SetLevelLoad(3,.5f);
 				}
 			}
 		}
@@ -96,6 +101,7 @@ public class ProfileManager : MonoBehaviour {
 		else if (state == ProfileManagerState.CreateName)
 		{
 			acceptButton.gameObject.SetActive(true);
+			acceptButton.isActive = true;
 			if (acceptButton.DetectClick())
 			{
 				
@@ -182,7 +188,7 @@ public class ProfileManager : MonoBehaviour {
 					nextState = ProfileManagerState.SelectCrew;
 					acceptButton.gameObject.SetActive(false);
 					SetCrewButtonActive(true);
-					crewButtons[profileCamera.selection].active = false;
+					crewButtons[profileCamera.selection].isActive = false;
 					profileCamera.SetMove();
 				}
 			}
@@ -488,7 +494,7 @@ public class ProfileManager : MonoBehaviour {
 			profileBoard.transform.FindChild(i + "Grade").GetComponent<TextMesh>().text = (profiles[i].Grade).ToString();
 			string val = (profiles[i].LinkedToJuddly == true) ? ("Yes" ): ("No");
 			profileBoard.transform.FindChild(i + "Juddly").GetComponent<TextMesh>().text = val;
-			profileBoard.transform.FindChild(i + "Progress").GetComponent<TextMesh>().text = (profiles[i].Progress).ToString() + "%";
+			profileBoard.transform.FindChild(i + "Progress").GetComponent<TextMesh>().text = (profiles[i].Planet).ToString() + "%";
 		
 			for (int j=0; j< crew.Length;j++)
 			{
@@ -501,15 +507,15 @@ public class ProfileManager : MonoBehaviour {
 	{
 		for (int i=0; i < newButtons.Length;i++)
 		{
-			newButtons[i].active = on;
+			newButtons[i].isActive = on;
 		}
 		for (int i=0; i < deleteButtons.Length;i++)
 		{
-			deleteButtons[i].active = on;
+			deleteButtons[i].isActive = on;
 		}
 		for (int i=0; i < playButtons.Length;i++)
 		{
-			playButtons[i].active = on;
+			playButtons[i].isActive = on;
 		}
 	}
 	
@@ -517,7 +523,7 @@ public class ProfileManager : MonoBehaviour {
 	{
 		for (int i=0; i < crewButtons.Length;i++)
 		{
-			crewButtons[i].active = on;
+			crewButtons[i].isActive = on;
 		}
 	}
 	

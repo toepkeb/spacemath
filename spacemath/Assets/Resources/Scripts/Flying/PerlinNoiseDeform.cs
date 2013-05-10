@@ -2,8 +2,8 @@
 using UnityEngine;
 
 public class PerlinNoiseDeform : MonoBehaviour {
-	float scale = .03f;
-	float speed = .5f;
+	public float scale = .03f;
+	public float speed = .5f;
 	bool recalculateNormals = false;
 	
 	private Vector3[] baseVertices;
